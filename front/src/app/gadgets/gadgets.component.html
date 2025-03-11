@@ -1,41 +1,102 @@
-<div class="container mt-5">
-  <h2 class="text-center">Gadgets List</h2>
+<div class="container-fluid">
+    <div class="col-12 mt-5 p-2">
+        <div class="row">
+            <div class="col-4  mt-3">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal"
+                    (click)="resetGadgetObj()" id="addGadgetBtn">
+                    Add Gadget
+                </button>
+            </div>
+            <div class="col-4 text-center">
+                <h2 class="text-center">Gadgets List</h2>
+            </div>
+            <div class="col-4 text-end">
+                <button class="btn btn-danger mt-3" (click)="logout()">Logout</button>
+            </div>
+        </div>
 
-  <table class="table table-bordered mt-3">
-    <thead class="table-dark">
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let gadget of gadgets">
-        <td>{{ gadget.id }}</td>
-        <td>{{ gadget.name }}</td>
-        <td>{{ gadget.description }}</td>
-      </tr>
-    </tbody>
-  </table>
+        <table class="table table-bordered mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th><input type="checkbox" (change)="toggleSelectAll($event)" /></th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th class="w-200">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let gadget of gadgets">
+                    <td><input type="checkbox" [(ngModel)]="gadget.selected" (change)="updateSelection(gadget)" /></td>
+                    <td>{{ gadget.id }}</td>
+                    <td>{{ gadget.name }}</td>
+                    <td>{{ gadget.description }}</td>
+                    <td>
+                        <button class="btn btn-primary me-3" (click)="openGadgetDetail(gadget)">
+                            Edit
+                        </button>
+                        <button class="btn btn-danger" (click)="deleteGadget(gadget)">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="text-start mb-2">
+            <button class="btn btn-danger" (click)="deleteSelected()" [disabled]="selectedGadgets.length === 0">
+                Delete Selected
+            </button>
+        </div>
 
-  <!-- Pagination -->
-  <nav *ngIf="totalPages > 1">
-    <ul class="pagination justify-content-center">
-      <li class="page-item" [class.disabled]="currentPage === 1">
-        <button class="page-link" (click)="changePage(currentPage - 1)">Previous</button>
-      </li>
+        <nav *ngIf="totalPages > 1">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" [class.disabled]="currentPage === 1">
+                    <button class="page-link" (click)="changePage(currentPage - 1)">Previous</button>
+                </li>
 
-      <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index">
-        <button class="page-link" (click)="changePage(i + 1)" [class.active]="currentPage === i + 1">
-          {{ i + 1 }}
-        </button>
-      </li>
+                <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index">
+                    <button class="page-link" (click)="changePage(i + 1)" [class.active]="currentPage === i + 1">
+                        {{ i + 1 }}
+                    </button>
+                </li>
 
-      <li class="page-item" [class.disabled]="currentPage === totalPages">
-        <button class="page-link" (click)="changePage(currentPage + 1)">Next</button>
-      </li>
-    </ul>
-  </nav>
+                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                    <button class="page-link" (click)="changePage(currentPage + 1)">Next</button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
 
-  <button class="btn btn-danger mt-3" (click)="logout()">Logout</button>
+<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{gadget.id?'Update':'Add'}} Gadget</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="name" id="name" [(ngModel)]="gadget.name" name="name" class="form-control"
+                        placeholder="Enter name" required />
+                    <p *ngIf="errorMessage.name" class="error">{{ errorMessage.name }}</p>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <input type="description" id="description" [(ngModel)]="gadget.description" name="description"
+                        class="form-control" placeholder="Enter description" required />
+                    <p *ngIf="errorMessage.description" class="error">{{ errorMessage.description }}</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="gadgetModal" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" class="btn btn-primary" (click)="saveGadget()">
+                    {{gadget.id?'Update':'Save'}}
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

@@ -1,38 +1,29 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const session = require("express-session");
 const db = require("../db/db");
 
 const router = express.Router();
 
-// Configure session
-router.use(
-    session({
-        secret: "86KqaQNAYdR4", // Change this to a strong secret key
-        resave: false,
-        saveUninitialized: true,
-        cookie: { secure: false }, // Set to true in production with HTTPS
-    })
-);
-
-// Admin Registration (One-time setup)
 router.post("/register", async (req, res) => {
-    const { name, email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+        const { name, email, password } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    db.run(
-        `INSERT INTO admin_user (name, email, password) VALUES (?, ?, ?)`,
-        [name, email, hashedPassword],
-        (err) => {
-            if (err) {
-                return res.status(400).json({ error: "Admin already exists or invalid data" });
+        db.run(
+            `INSERT INTO admin_user (name, email, password) VALUES (?, ?, ?)`,
+            [name, email, hashedPassword],
+            function (err) {
+                if (err) {
+                    return res.status(400).json({ error: "Admin already exists or invalid data" });
+                }
+                res.json({ message: "Admin registered successfully!", adminId: this.lastID });
             }
-            res.json({ message: "Admin registered successfully!" });
-        }
-    );
+        );
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
 });
 
-// Admin Login
 router.post("/login", (req, res) => {
     const { email, password } = req.body;
 
@@ -51,18 +42,19 @@ router.post("/login", (req, res) => {
     });
 });
 
-// Check Authentication Status
 router.get("/check-auth", (req, res) => {
-    if (req.session.adminId) {
-        res.json({ authenticated: true });
+    if (req.session && req.session.adminId) {
+        res.json({ authenticated: true, adminId: req.session.adminId });
     } else {
         res.json({ authenticated: false });
     }
 });
 
-// Admin Logout
 router.post("/logout", (req, res) => {
-    req.session.destroy(() => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ error: "Logout failed" });
+        }
         res.json({ message: "Logged out successfully" });
     });
 });

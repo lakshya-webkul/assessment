@@ -4,6 +4,7 @@ import { AppComponent } from './app/app.component';
 import { LoginComponent } from './app/login/login.component';
 import { GadgetsComponent } from './app/gadgets/gadgets.component';
 import { importProvidersFrom } from '@angular/core';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 const routes: Routes = [
   { path: '', component: LoginComponent },
